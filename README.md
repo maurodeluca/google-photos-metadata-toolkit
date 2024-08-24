@@ -60,15 +60,19 @@ Applies metadata to image files using corresponding JSON files listed in the inp
 The scripts rely on the following tools:
 
 - **`exiftool`**: For reading and writing EXIF metadata.
-- **`find`**: Used to locate image files within directories.
-- **`parallel`**: (Optional) Used for parallel processing of metadata application tasks.
 
 ### Install Dependencies
 
 For Arch Linux:
 
 ```bash
-sudo pacman -S exiftool findutils parallel
+sudo pacman -S exiftool
+```
+
+For Ubuntu Linux:
+
+```bash
+sudo apt-get install exiftool
 ```
 
 ## Workflow
