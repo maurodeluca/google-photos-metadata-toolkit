@@ -125,5 +125,3 @@ Feel free to submit issues, fork the repository, and create pull requests. Contr
 This project is licensed under the MIT License.
 
 ---
-
-This README provides a comprehensive overview of the `metadata-toolkit` repository, including installation instructions, usage examples, and troubleshooting tips. Adjustments can be made based on any additional features or changes you may introduce to the scripts.
