@@ -77,6 +77,7 @@ if [ ! -f "$input_file" ]; then
     usage
 fi
 
+
 # Function to convert Google Photos JSON to ExifTool JSON
 convert_json() {
   local json_file="$1"
@@ -99,9 +100,8 @@ convert_json() {
   # Converting timestamps to ExifTool date format
   creation_date=$(date -d @"$creation_timestamp" +"%Y:%m:%d %H:%M:%S")
   photo_taken_date=$(date -d @"$photo_taken_timestamp" +"%Y:%m:%d %H:%M:%S")
-  last_modified_date=$(date -d @"$last_modified_timestamp" +"%Y:%m:%d %H:%M:%S")
-
-  # Creating ExifTool compatible JSON
+  
+  # Start creating the ExifTool compatible JSON
   cat <<EOF > "$exif_json_file"
 [{
   "SourceFile": "$image_file",
@@ -113,11 +113,18 @@ convert_json() {
   "GPSLatitude": $latitude,
   "GPSLongitude": $longitude,
   "GPSAltitude": $altitude,
-  "LastModifiedDate": "$last_modified_date",
   "DeviceType": "$device_type",
   "URL": "$url"
-}]
 EOF
+
+  # Check if last_modified_timestamp is not null before adding ModifyDate
+  if [ "$last_modified_timestamp" != "null" ] && [ -n "$last_modified_timestamp" ]; then
+    last_modified_date=$(date -d @"$last_modified_timestamp" +"%Y:%m:%d %H:%M:%S")
+    echo "  ,\"ModifyDate\": \"$last_modified_date\"" >> "$exif_json_file"
+  fi
+
+  # Close the JSON array
+  echo "}]" >> "$exif_json_file"
 }
 
 # Function to apply metadata to a single file
