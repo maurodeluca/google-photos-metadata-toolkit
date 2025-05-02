@@ -17,48 +17,42 @@ const log      = document.getElementById('log');
   })
 );
 
-
-// Handle the drop
+// Handle dropped files
 dropArea.addEventListener('drop', async e => {
   e.preventDefault();
   dropArea.classList.remove('highlight');
 
-  // We expect the first dropped item to be a directory
-  const file = e.dataTransfer.files[0];
-  const info = {
-    name:     file.name,
-    type:     file.webkitRelativePath,
-    size:     file.size,
-    lastModified: file.lastModified,
-    lastModifiedDate: file.lastModifiedDate,
-  };
+  const droppedFiles = [...e.dataTransfer.files];
 
-  console.log();
-  if (!file || !file.path) {
-    log.textContent = '❌ No folder detected in drop!\n' + JSON.stringify(info, null, 2);
+  if (droppedFiles.length === 0) {
+    log.textContent = '❌ No files dropped!';
     return;
   }
 
-  const fs = require('fs');
-  const stat = fs.statSync(file.path);
-  if (!stat.isDirectory()) {
-    log.textContent = '❌ Please drop a folder, not a file.';
+  const files = [];
+
+  for (const file of droppedFiles) {
+    try {
+      const path = await window.electronAPI.getPathForFile(file);
+      files.push({ file, path });
+    } catch (err) {
+      console.warn('Skipping item:', err);
+    }
+  }
+
+  if (files.length === 0) {
+    log.textContent = '⚠️ All dropped items were folders or inaccessible. Please drop files only.';
     return;
   }
 
-  log.textContent = `🔄 Processing folder:\n${file.path}\n\n`;
+  log.textContent = `🔄 Processing ${files.length} file(s)...\n\n`;
+
   try {
-    const messages = await window.electronAPI.processDirectory(file.path);
-    log.textContent += messages.join('\n');
+    const results = await Promise.all(
+      files.map(({ path }) => window.electronAPI.processFile(path))
+    );
+    results.forEach(res => (log.textContent += `${res}\n`));
   } catch (err) {
-    log.textContent += `❌ Unexpected error: ${err}`;
+    log.textContent += `❌ Error: ${err.message}`;
   }
-});
-
-document.getElementById('chooseBtn').addEventListener('click', async () => {
-  const folder = await window.electronAPI.chooseDirectory();
-  if (!folder) return;
-  log.textContent = `🔄 Processing: ${folder}\n`;
-  const msgs = await window.electronAPI.processDirectory(folder);
-  log.textContent += msgs.join('\n');
 });

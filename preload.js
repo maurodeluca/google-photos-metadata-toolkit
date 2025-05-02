@@ -1,6 +1,8 @@
-const { contextBridge, ipcRenderer } = require('electron');
+const { contextBridge, ipcRenderer, webUtils } = require('electron');
 
 contextBridge.exposeInMainWorld('electronAPI', {
-  chooseDirectory: () => ipcRenderer.invoke('dialog:openDirectory'),
-  processDirectory: (dir) => ipcRenderer.invoke('process-directory', dir)
+  getPathForFile: (file) => {
+    return webUtils.getPathForFile(file);
+  },
+  processFile: (filePath) => ipcRenderer.invoke('process-file', filePath)
 });

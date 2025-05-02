@@ -1,8 +1,7 @@
 const fs = require("fs");
-const readline = require("readline");
-const { spawn } = require("child_process");
 const os = require("os");
 const path = require("path");
+const { exiftool } = require("exiftool-vendored");
 
 function formatTimestamp(unix) {
   if (!unix || isNaN(unix)) return null;
@@ -10,7 +9,7 @@ function formatTimestamp(unix) {
   return date.toISOString().replace("T", " ").split(".")[0].replace(/-/g, ":");
 }
 
-function convertJson(jsonPath, imagePath) {
+function buildExifData(jsonPath, imagePath) {
   const json = JSON.parse(fs.readFileSync(jsonPath, "utf8"));
 
   const exifData = {
@@ -30,50 +29,24 @@ function convertJson(jsonPath, imagePath) {
   const lastModified = formatTimestamp(json.photoLastModifiedTime?.timestamp);
   if (lastModified) exifData.ModifyDate = lastModified;
 
-  const tmpPath = path.join(os.tmpdir(), `exiftool_${path.basename(imagePath)}.json`);
-  fs.writeFileSync(tmpPath, JSON.stringify([exifData], null, 2));
-  return tmpPath;
+  return exifData;
 }
 
-function applyMetadata(imagePath, jsonPath) {
-  const exifJson = convertJson(jsonPath, imagePath);
-  return new Promise((resolve, reject) => {
-    const child = spawn("exiftool", ["-json=" + exifJson, imagePath]);
+async function applyMetadata(imagePath, jsonPath) {
+  const exifData = buildExifData(jsonPath, imagePath);
 
-    child.on("exit", code => {
-      fs.unlinkSync(exifJson);
-      code === 0 ? resolve() : reject(new Error(`ExifTool exited with code ${code}`));
-    });
-  });
-}
-
-async function main(inputFile) {
-  const lines = fs.readFileSync(inputFile, "utf-8").split("\n").filter(Boolean);
-  let count = 0;
-
-  for (const line of lines) {
-    count++;
-    const [image, json] = line.split(",");
-    if (fs.existsSync(image) && fs.existsSync(json)) {
-      console.log(`Processing ${count}/${lines.length}: ${image}`);
-      try {
-        await applyMetadata(image, json);
-      } catch (e) {
-        console.error(`❌ Failed on ${image}:`, e.message);
-      }
-    } else {
-      console.warn(`⚠️  Missing file in: ${line}`);
-    }
+  try {
+    await exiftool.write(imagePath, exifData);
+    console.log(`✅ Metadata applied to ${imagePath}`);
+  } catch (error) {
+    console.error(`❌ Failed to write metadata for ${imagePath}:`, error);
+    throw error;
   }
-
-  console.log("✅ All files processed.");
 }
 
-if (require.main === module) {
-  const input = process.argv[2];
-  if (!input) {
-    console.error("Usage: node applyMetadata.js <input_file>");
-    process.exit(1);
-  }
-  main(input);
-}
+module.exports = { applyMetadata };
+
+// Optional: cleanup on shutdown
+process.on("exit", () => {
+  exiftool.end();
+});

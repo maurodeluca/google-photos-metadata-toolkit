@@ -2,21 +2,55 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Metadata Toolkit</title>
+  <title>Google Photos Metadata Toolkit</title>
   <style>
-    body { font-family: sans-serif; padding: 2em; }
-    #controls { margin-bottom: 1em; }
-    #log { white-space: pre-wrap; border-top: 1px solid #ccc; padding-top: 1em; }
+    body {
+      font-family: sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2em;
+    }
+    #drop-area {
+      border: 2px dashed #aaa;
+      padding: 2em;
+      width: 90%;
+      text-align: center;
+      margin-bottom: 2em;
+      transition: border-color 0.2s, background-color 0.2s;
+    }
+    #drop-area.highlight {
+      border-color: #00a;
+      background-color: rgba(0, 170, 255, 0.1);
+    }
+    #log {
+      white-space: pre-wrap;
+      border-top: 1px solid #ccc;
+      padding-top: 1em;
+      width: 90%;
+    }
+    #instructions {
+      max-width: 800px;
+      text-align: left;
+      margin-bottom: 2em;
+      color: #333;
+    }
   </style>
 </head>
 <body>
-  <h1>📸 Metadata Toolkit</h1>
-
-  <div id="controls">
-    <button id="chooseBtn">Choose Folder…</button>
+  <h1>📸 Google Photos Metadata Toolkit</h1>
+  <div id="instructions">
+    <p>This tool lets you restore metadata to photos exported from Google Photos using their corresponding <code>.json</code> sidecar files.</p>
+    <ul>
+      <li>Drag and drop your image files (e.g. <code>.jpg</code>, <code>.png</code>) into the box below.</li>
+      <li>Make sure each image has a corresponding <code>.json</code> file with the same name (e.g. <code>photo.jpg</code> and <code>photo.json</code>).</li>
+      <li>The app will extract timestamps, location, and other metadata from the JSON file and write it into the image using ExifTool.</li>
+    </ul>
+    <p>Once done, you’ll see the processing results below.</p>
   </div>
 
-  <div id="log">No folder selected.</div>
+  <div id="drop-area">Drag &amp; drop your files here</div>
+  <div id="log"></div>
 
   <script src="renderer.js"></script>
 </body>
