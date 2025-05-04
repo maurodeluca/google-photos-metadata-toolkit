@@ -85,59 +85,23 @@ The project relies on the following tools and libraries:
 - **ExifTool**: For reading and writing EXIF metadata.
 - **jq**: For processing JSON data in shell scripts.
 
-### Installing Dependencies
-
-For Linux:
-```bash
-sudo apt-get install exiftool jq
-```
-
-For macOS:
-```bash
-brew install exiftool jq
-```
-
 ## Development
 
 ### Running the App in Development Mode
 
-1. Install Electron Forge CLI:
+
+### Building Installer
+
+1. Install Electron Builder CLI:
    ```bash
-   npm install -g @electron-forge/cli
+   npm install electron-builder --save-dev
    ```
 
-2. Start the app:
-   ```bash
-   npm start
-   ```
-
-### Packaging the App
-
-To package the app for distribution:
-```bash
-npm run package
-```
-
-### Building Installers
-
-To create platform-specific installers:
+2. To create platform-specific installers:
 ```bash
 npm run make
 ```
 
-## Troubleshooting
-
-### Common Errors
-
-- **"Bad format (0) for IFD0 entry 0"**: This error usually indicates corrupted EXIF metadata. Try running `exiftool` with different options to clean the metadata or strip and reapply it.
-
-### Locale Warnings
-
-If you encounter locale warnings, ensure your system's locale settings are correctly configured:
-```bash
-export LC_ALL=en_US.UTF-8
-export LANG=en_US.UTF-8
-```
 
 ## Contributing
 
